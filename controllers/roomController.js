@@ -52,7 +52,7 @@ exports.createRoom = async (req, res) => {
     //send a response message
     res.status(200).json({
       message: "Room added successfully",
-      data: room,
+      data: room
     });
   } catch (error) {
     console.error(error.message);
@@ -140,8 +140,6 @@ exports.changeRoomImage = async (req, res) => {
                 message: "Image Not Found in this Room" 
             });
         }
-
-      
         await cloudinary.uploader.destroy(imageId);
 
         // Upload new image to Cloudinary
@@ -164,7 +162,6 @@ exports.changeRoomImage = async (req, res) => {
                 console.log("Local file deleted successfully.");
             }
         });
-
         // Return success response
         return res.status(200).json({
             message: "Room image updated successfully",

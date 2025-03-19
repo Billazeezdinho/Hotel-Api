@@ -17,6 +17,7 @@ exports.registerValidate = async (req, res, next) =>{
         email: Joi.string.email()
         .required()
         .messages({
+            "string.email": "Invalid email format",
             "any.required":"Email is required",
             "string.email":"Invalid Email Format"
         }),
@@ -25,7 +26,8 @@ exports.registerValidate = async (req, res, next) =>{
         .required()
         .messages({
             "any.required": "Password is required",
-            "string.min": " password must be at least 6 characters"
+            "string.empty": " password cannot be empty",
+            "string.pattern.base": "Password must be minimum of 8 character and include at least one UpperCase, Lowercase and a special character [!@#$%^&*].",
         })
 
     })
