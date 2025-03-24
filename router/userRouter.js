@@ -24,6 +24,7 @@
 // });
 
 // module.exports= router;
+
 const router = require('express').Router();
 const { authenticate, superAdminAuth } = require('../middleware/authentication');
 const { 
@@ -54,12 +55,12 @@ const jwt = require('jsonwebtoken');
  *           schema:
  *             type: object
  *             properties:
- *               name:
+ *               fullName:
  *                 type: string
  *                 example: "John Doe"
  *               email:
  *                 type: string
- *                 example: "johndoe@example.com"
+ *                 example: "johndoe@gmail.com"
  *               password:
  *                 type: string
  *                 example: "StrongPass@123"
@@ -107,7 +108,7 @@ router.get('/verify-user/:token', verifyUsers);
  *             properties:
  *               email:
  *                 type: string
- *                 example: "johndoe@example.com"
+ *                 example: "johndoe@gmail.com"
  *               password:
  *                 type: string
  *                 example: "StrongPass@123"
@@ -148,7 +149,6 @@ router.get('/users', authenticate, getAll);
  *         description: User is already verified
  */
 router.get('/verify', resendVerificationEmail);
-
 /**
  * @swagger
  * /api/v1/make-admin/{id}:
@@ -156,57 +156,78 @@ router.get('/verify', resendVerificationEmail);
  *     summary: Assign admin role to a user
  *     tags: [Users]
  *     security:
- *       - BearerAuth: []
+ *       - BearerAuth: [] # Requires authentication
  *     parameters:
  *       - name: id
  *         in: path
  *         required: true
  *         schema:
  *           type: string
+ *         description: The ID of the user to be promoted
  *         example: "65abcd123456ef7890ghijk"
  *     responses:
  *       200:
- *         description: User promoted to admin
+ *         description: User promoted to admin successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "User John Doe is now an admin"
+ *       400:
+ *         description: Bad Request - User is Already an Admin
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "User is already an admin"
+ *       401:
+ *         description: Unauthorized - Token Required or Expired
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Access denied, token must be provided"
  *       403:
  *         description: Only super admins can perform this action
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Unauthorized: Not a super admin"
+ *       404:
+ *         description: Not Found - User Not Found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "User not found"
+ *       500:
+ *         description: Internal Server Error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Internal server error"
  */
+
 router.patch('/make-admin/:id', authenticate, superAdminAuth, makeAdmin);
-
-/**
- * @swagger
- * /api/v1/google-authenticate:
- *   get:
- *     summary: Google OAuth authentication
- *     tags: [Users]
- *     description: Redirects user to Google's OAuth login page.
- *     responses:
- *       302:
- *         description: Redirects to Google login
- */
-router.get('/google-authenticate', passport.authenticate('google', { scope: ['profile', 'email'] }));
-
-/**
- * @swagger
- * /api/v1/auth/google/login:
- *   get:
- *     summary: Google OAuth login callback
- *     tags: [Users]
- *     description: Handles authentication after Google login and returns JWT token.
- *     responses:
- *       200:
- *         description: Google authentication successful
- */
-router.get('/auth/google/login', passport.authenticate('google'), async (req, res) => {
-    const token = await jwt.sign(
-        { userId: req.user._id, isVerified: req.user.isVerified },
-        process.env.key,
-        { expiresIn: "1d" }
-    );
-    res.status(200).json({
-        message: 'Google Auth Logic Successfully',
-        data: req.user,
-        token
-    });
-});
 
 module.exports = router;
