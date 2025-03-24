@@ -230,4 +230,145 @@ router.get('/verify', resendVerificationEmail);
 
 router.patch('/make-admin/:id', authenticate, superAdminAuth, makeAdmin);
 
+
+/**
+ * @swagger
+ * tags:
+ *   name: Authentication
+ *   description: User authentication including Google OAuth and manual signup/login
+ */
+
+/**
+ * @swagger
+ * /api/v1/signup:
+ *   post:
+ *     summary: Register a new user
+ *     tags: [Authentication]
+ *     description: Create an account for the hotel booking system.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               fullName:
+ *                 type: string
+ *                 example: "John Doe"
+ *               email:
+ *                 type: string
+ *                 example: "johndoe@gmail.com"
+ *               password:
+ *                 type: string
+ *                 example: "SecurePass@123"
+ *     responses:
+ *       201:
+ *         description: User registered successfully
+ *       400:
+ *         description: Validation error
+ *       409:
+ *         description: Email already exists
+ */
+
+/**
+ * @swagger
+ * /api/v1/login:
+ *   post:
+ *     summary: Authenticate user and return token
+ *     tags: [Authentication]
+ *     description: Logs in a user and returns an authentication token.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 example: "johndoe@gmail.com"
+ *               password:
+ *                 type: string
+ *                 example: "SecurePass@123"
+ *     responses:
+ *       200:
+ *         description: Login successful, returns JWT token
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 token:
+ *                   type: string
+ *                   example: "eyJhbGciOiJIUzI1..."
+ *       401:
+ *         description: Invalid credentials
+ */
+
+/**
+ * @swagger
+ * /api/v1/google-authenticate:
+ *   get:
+ *     summary: Redirect user to Google authentication
+ *     tags: [Authentication]
+ *     description: Initiates Google OAuth authentication flow.
+ *     responses:
+ *       302:
+ *         description: Redirects to Google login page
+ */
+router.get('/google-authenticate', passport.authenticate('google', { scope: ['profile', 'email'] }));
+
+/**
+ * @swagger
+ * /api/v1/auth/google/login:
+ *   get:
+ *     summary: Authenticate user via Google OAuth
+ *     tags: [Authentication]
+ *     description: Logs in the user via Google OAuth and returns a JWT token.
+ *     responses:
+ *       200:
+ *         description: Google Authentication Successful
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Google Auth Logic Successfully"
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     _id:
+ *                       type: string
+ *                       example: "65abcd123456ef7890ghijk"
+ *                     fullName:
+ *                       type: string
+ *                       example: "John Doe"
+ *                     email:
+ *                       type: string
+ *                       example: "johndoe@gmail.com"
+ *                     isVerified:
+ *                       type: boolean
+ *                       example: true
+ *                 token:
+ *                   type: string
+ *                   example: "eyJhbGciOiJIUzI1..."
+ *       401:
+ *         description: Unauthorized - Google authentication failed
+ */
+router.get('/auth/google/login', passport.authenticate('google'), async (req, res) => {
+    const token = await jwt.sign(
+        { userId: req.user._id, isVerified: req.user.isVerified },
+        process.env.key,
+        { expiresIn: "1d" }
+    );
+    res.status(200).json({
+        message: 'Google Auth Logic Successfully',
+        data: req.user,
+        token
+    });
+});
+
+
 module.exports = router;

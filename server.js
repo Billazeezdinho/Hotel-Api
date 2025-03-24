@@ -75,7 +75,7 @@ const swaggerOptions = {
         name: "base: https://hotel-api-svnc.onrender.com/api/v1",
       }
     },
-    servers: [{ url: "https://hotel-api-svnc.onrender.com",
+    servers: [{ url: "https://hotel-api-svnc.onrender.com/api/v1",
         description: 'production Server'
      },
         {url: "http://localhost:"+ PORT, 
@@ -100,7 +100,7 @@ app.use("/api/v1", roomRouter);
 // Start Server
 app.listen(PORT, () => {
   console.log(`Server is listening on PORT: ${PORT}`);
-  console.log(`Swagger docs available at http://localhost:${PORT}/api-docs`);
+  console.log(`Swagger docs available at https://hotel-api-svnc.onrender.com/api-docs`);
 });
 
 
