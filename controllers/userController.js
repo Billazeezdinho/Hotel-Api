@@ -14,7 +14,7 @@ exports.register = async (req, res) => {
         message: `Email ${email} already exists`
       });
     }
-    console.log(userExists)
+    // console.log(userExists);
     // const salt = await 
     const hashedPassword = await bcrypt.hash(password, 10);
       const user = new userModel({
