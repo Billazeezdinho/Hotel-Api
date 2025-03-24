@@ -35,6 +35,7 @@ const session = require("express-session");
 const passport = require("passport");
 const swaggerJsDoc = require("swagger-jsdoc");
 const swaggerUi = require("swagger-ui-express");
+const cors = require('cors');
 
 require("./middleware/passport");
 
@@ -48,6 +49,7 @@ const roomRouter = require("./router/roomRouter");
 
 const app = express();
 app.use(express.json());
+app.use(cors({origin: '*'}));
 
 // Express Session
 app.use(
@@ -69,8 +71,11 @@ const swaggerOptions = {
       title: "API Documentation",
       version: "1.0.0",
       description: "API for User, Category, and Room Management",
+      license: {
+        name: "base: https://hotel-api-svnc.onrender.com/api/v1",
+      }
     },
-    servers: [{ url: "http://localhost:" + PORT,
+    servers: [{ url: "https://hotel-api-svnc.onrender.com",
         description: 'production Server'
      },
         {url: "http://localhost:"+ PORT, 
@@ -85,7 +90,7 @@ const swaggerDocs = swaggerJsDoc(swaggerOptions);
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
 // Use Routers
-app.use('/', (req, res)=>{
+app.get('/', (req, res)=>{
     res.send('Welcome to cloud view Hotel')
 })
 app.use("/api/v1", userRouter);
@@ -97,3 +102,5 @@ app.listen(PORT, () => {
   console.log(`Server is listening on PORT: ${PORT}`);
   console.log(`Swagger docs available at http://localhost:${PORT}/api-docs`);
 });
+
+

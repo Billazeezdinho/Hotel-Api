@@ -81,67 +81,146 @@ exports.register = async (req, res) => {
 //   }
 // }; 
 
-exports.verifyUsers = async (req, res)=>{
-  try{
-    const { token } = req.params;
-    await jwt.verify(token, process.env.key, async (error, payload)=>{
-      if (error){
-        if (error instanceof jwt.JsonWebTokenError){
-          const decodedToken = await jwt.decode(token);
-          const user = await userModel.findById(decodedToken.userId);
-          if(user == null){
-            return res.status(404).json({
-              message: 'User not Found'
-            })
-          }
-          if(user.isVerified === true){
-            return res.status(400).json({
-              message: 'User has already been verified, please proceed to login'
-            })
-          }
+// exports.verifyUsers = async (req, res)=>{
+  // try{
+  //   const { token } = req.params;
+  //   await jwt.verify(token, process.env.key, async (error, payload)=>{
+  //     if (error){
+  //       if (error instanceof jwt.JsonWebTokenError){
+  //         const decodedToken = await jwt.decode(token);
+  //         const user = await userModel.findById(decodedToken.userId);
+  //         if(user == null){
+  //           return res.status(404).json({
+  //             message: 'User not Found'
+  //           })
+  //         }
+  //         if(user.isVerified === true){
+  //           return res.status(400).json({
+  //             message: 'User has already been verified, please proceed to login'
+  //           })
+  //         }
        
-         const newToken = await jwt.sign({
-          userId: user._id}, process.env.key,{ expiresIn : '3mins' });
-          const link = `${req.protocol}://${req.get('host')}/api/v1/verify-user/${newToken}`;
-          const firstName = user.fullName.split(' ')[0];
-          const mailDetails = {
-            email: user.email,
-            subject: 'Verification Link',
-            html: signUp(link, firstName)
-          }
-          await sendMail(mailDetails);
-          res.status(200).json({
-            message: 'Link expired: A new verification link was sent, please check your email'
-          })
+  //        const newToken = await jwt.sign({
+  //         userId: user._id}, process.env.key,{ expiresIn : '3mins' });
+  //         const link = `${req.protocol}://${req.get('host')}/api/v1/verify-user/${newToken}`;
+  //         const firstName = user.fullName.split(' ')[0];
+  //         const mailDetails = {
+  //           email: user.email,
+  //           subject: 'Verification Link',
+  //           html: signUp(link, firstName)
+  //         }
+  //         await sendMail(mailDetails);
+  //         res.status(200).json({
+  //           message: 'Link expired: A new verification link was sent, please check your email'
+  //         })
+  //       }
+
+  //       }else{
+  //         console.log(payload )
+  //         const user = await userModel.findById(payload.userId);
+  //         if (user === null){
+  //           return res.status(404).json({
+  //             message: 'User not found'
+  //           })
+  //         }
+  //         if(user.Verified === true){
+  //           return res.status(400).json({
+  //             message: ' User has already been verified, please proceed to login'
+  //           })
+  //         }
+  //         user.isVerified = true;
+  //         await user.save();
+  //         res.status(200).json({
+  //           message: "Account verified successfully "
+  //         });
+  //     }
+  //   })
+  // }catch(error){
+  //   console.error(error.message);
+  //   return res.status(500).json({
+  //     message: "Internal Server Error",
+  //   });
+  // }
+// }
+
+exports.verifyUsers = async (req, res) => {
+  try {
+    const { token } = req.params;
+
+    let payload;
+    try {
+      payload = jwt.verify(token, process.env.key);
+    } catch (error) {
+      if (error instanceof jwt.TokenExpiredError) {
+        // Decode the token to get user info
+        const decodedToken = jwt.decode(token);
+        if (!decodedToken) {
+          return res.status(400).json({ message: 'Invalid Token' });
         }
 
-        }else{
-          console.log(payload )
-          const user = await userModel.findById(payload.userId);
-          if (user === null){
-            return res.status(404).json({
-              message: 'User not found'
-            })
-          }
-          if(user.Verified === true){
-            return res.status(400).json({
-              message: ' User has already been verified, please proceed to login'
-            })
-          }
-          user.isVerified = true;
-          await user.save();
-          res.status(200).json({
-            message: "Account verified successfully "
+        const user = await userModel.findById(decodedToken.userId);
+        if (!user) {
+          return res.status(404).json({ message: 'User not found' });
+        }
+
+        if (user.isVerified) {
+          return res.status(400).json({
+            message: 'User has already been verified. Please proceed to login.',
           });
+        }
+
+        // Generate a new token
+        const newToken = jwt.sign(
+          { userId: user._id, isAdmin: user.isAdmin },
+          process.env.key,
+          { expiresIn: '3mins' }
+        );
+
+        const link = `${req.protocol}://${req.get('host')}/api/v1/verify-user/${newToken}`;
+        const firstName = user.fullName.split(' ')[0];
+
+        // Send verification email
+        const mailDetails = {
+          email: user.email,
+          subject: 'Verification Link',
+          html: signUp(link, firstName),
+        };
+        await sendMail(mailDetails);
+
+        return res.status(200).json({
+          message: 'Verification link expired. A new link has been sent to your email.',
+        });
       }
-    })
-  }catch(error){
+
+      return res.status(400).json({ message: 'Invalid token' });
+    }
+
+    // Token is valid, verify user
+    const user = await userModel.findById(payload.userId);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    if (user.isVerified) {
+      return res.status(400).json({
+        message: 'User has already been verified. Please proceed to login.',
+      });
+    }
+
+    user.isVerified = true;
+    await user.save();
+
+    res.status(200).json({
+      message: 'Account verified successfully',
+    });
+  } catch (error) {
     console.error(error.message);
     return res.status(500).json({
-      message: "Internal Server Error",
+      message: 'Internal Server Error',
     });
   }
-}
+};
+
 
 exports.login = async (req, res)=>{
   try{
@@ -246,14 +325,18 @@ exports.makeAdmin = async (req, res)=>{
         message: 'User not found'
       })
     };
-    if(user.isAdmin == true){
+    if(user.isSuperAdmin == true){
       return res.status(400).json({
-        message: 'User is already an Admin'
+        message: 'User is already an Super Admin'
       })
     };
 
-    user.isAdmin = true;
+    user.isSuperAdmin = true;
     await user.save()
+    res.status(200).json({
+      message: 'User has been made an super admin',
+      user
+    });
 
   }catch(error){
     console.log(error.message)
@@ -262,3 +345,4 @@ exports.makeAdmin = async (req, res)=>{
     })
   }
 }
+

@@ -8,16 +8,17 @@
 
 
 // module.exports = roomRouter;
-
-const roomRouter = require("express").Router();
-const { createRoom, changeRoomImage, deleteRoomImage } = require("../controllers/roomController");
-const upload = require("../utils/multer");
+const roomRouter = require('express').Router();
+const { createRoom, changeRoomImage, deleteRoomImage } = require('../controllers/roomController');
+const upload = require('../utils/multer');
 
 /**
  * @swagger
  * /api/v1/room:
  *   post:
  *     summary: Create a new room
+ *     tags:
+ *       - Rooms
  *     requestBody:
  *       required: true
  *       content:
@@ -34,54 +35,54 @@ const upload = require("../utils/multer");
  *       201:
  *         description: Room created successfully
  */
-roomRouter.post("/room", upload.array("images", 10), createRoom);
+roomRouter.post('/room', upload.array('images', 10), createRoom);
 
 /**
  * @swagger
  * /api/v1/room/{id}/{imageId}:
  *   patch:
- *     summary: Change a room image
+ *     summary: Change room image
+ *     tags:
+ *       - Rooms
  *     parameters:
- *       - in: path
- *         name: id
+ *       - name: id
+ *         in: path
  *         required: true
- *         description: Room ID
  *         schema:
  *           type: string
- *       - in: path
- *         name: imageId
+ *       - name: imageId
+ *         in: path
  *         required: true
- *         description: Image ID
  *         schema:
  *           type: string
  *     responses:
  *       200:
- *         description: Room image changed
+ *         description: Room image changed successfully
  */
-roomRouter.patch("/room/:id/:imageId", upload.single("image"), changeRoomImage);
+roomRouter.patch('/room/:id/:imageId', upload.single('image'), changeRoomImage);
 
 /**
  * @swagger
  * /api/v1/room/{id}/{imageId}:
  *   delete:
- *     summary: Delete a room image
+ *     summary: Delete room image
+ *     tags:
+ *       - Rooms
  *     parameters:
- *       - in: path
- *         name: id
+ *       - name: id
+ *         in: path
  *         required: true
- *         description: Room ID
  *         schema:
  *           type: string
- *       - in: path
- *         name: imageId
+ *       - name: imageId
+ *         in: path
  *         required: true
- *         description: Image ID
  *         schema:
  *           type: string
  *     responses:
  *       200:
- *         description: Room image deleted
+ *         description: Room image deleted successfully
  */
-roomRouter.delete("/room/:id/:imageId", deleteRoomImage);
+roomRouter.delete('/room/:id/:imageId', deleteRoomImage);
 
 module.exports = roomRouter;

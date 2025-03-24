@@ -8,9 +8,9 @@
 
 // module.exports = categoryRouter;
 
-const categoryRouter = require("express").Router();
-const { createCategory, getAll } = require("../controllers/categoryController");
-const { authenticate, adminAuth } = require("../middleware/authentication");
+const categoryRouter = require('express').Router();
+const { createCategory, getAll } = require('../controllers/categoryController');
+const { authenticate, adminAuth } = require('../middleware/authentication');
 
 /**
  * @swagger
@@ -18,25 +18,39 @@ const { authenticate, adminAuth } = require("../middleware/authentication");
  *   post:
  *     summary: Create a new category
  *     security:
- *       - bearerAuth: []
- *     description: Only admins can create a category.
+ *       - BearerAuth: []
+ *     tags:
+ *       - Categories
+ *     description: Only admins can create a category
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 example: "Luxury"
  *     responses:
  *       201:
  *         description: Category created successfully
- *       403:
- *         description: Unauthorized
+ *       401:
+ *         description: Unauthorized (Admin Access Required)
  */
-categoryRouter.post("/category", authenticate, adminAuth, createCategory);
+categoryRouter.post('/category', authenticate, adminAuth, createCategory);
 
 /**
  * @swagger
  * /api/v1/category:
  *   get:
  *     summary: Get all categories
+ *     tags:
+ *       - Categories
  *     responses:
  *       200:
- *         description: A list of categories
+ *         description: Successfully retrieved all categories
  */
-categoryRouter.get("/category", getAll);
+categoryRouter.get('/category', getAll);
 
 module.exports = categoryRouter;

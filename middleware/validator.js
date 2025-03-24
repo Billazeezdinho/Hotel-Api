@@ -14,7 +14,8 @@ exports.registerValidate = async (req, res, next) =>{
             "string.pattern.base": "FullName should only contain alphabets",
             "string.min": "fullname should not be less than 3 letters"
         }),
-        email: Joi.string.email()
+        email: Joi.string()
+        .email()
         .required()
         .messages({
             "string.email": "Invalid email format",
@@ -23,6 +24,7 @@ exports.registerValidate = async (req, res, next) =>{
         }),
         password: Joi.string()
         .min(6)
+        .pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*]).{8,}$/)
         .required()
         .messages({
             "any.required": "Password is required",
