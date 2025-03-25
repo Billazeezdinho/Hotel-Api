@@ -43,7 +43,7 @@ const jwt = require('jsonwebtoken');
 
 /**
  * @swagger
- * /api/v1/register:
+ * /register:
  *   post:
  *     summary: Register a new user
  *     tags: [Users]
@@ -74,7 +74,7 @@ router.post('/register', registerValidate, register);
 
 /**
  * @swagger
- * /api/v1/verify-user/{token}:
+ * /verify-user/{token}:
  *   get:
  *     summary: Verify user via email token
  *     tags: [Users]
@@ -95,7 +95,7 @@ router.get('/verify-user/:token', verifyUsers);
 
 /**
  * @swagger
- * /api/v1/login:
+ * /login:
  *   post:
  *     summary: Authenticate user and return token
  *     tags: [Users]
@@ -122,7 +122,7 @@ router.post('/login', login);
 
 /**
  * @swagger
- * /api/v1/users:
+ * /users:
  *   get:
  *     summary: Get all users
  *     tags: [Users]
@@ -138,7 +138,7 @@ router.get('/users', authenticate, getAll);
 
 /**
  * @swagger
- * /api/v1/verify:
+ * /verify:
  *   get:
  *     summary: Resend verification email
  *     tags: [Users]
@@ -151,7 +151,7 @@ router.get('/users', authenticate, getAll);
 router.get('/verify', resendVerificationEmail);
 /**
  * @swagger
- * /api/v1/make-admin/{id}:
+ * /make-admin/{id}:
  *   patch:
  *     summary: Assign admin role to a user
  *     tags: [Users]
@@ -240,7 +240,7 @@ router.patch('/make-admin/:id', authenticate, superAdminAuth, makeAdmin);
 
 /**
  * @swagger
- * /api/v1/signup:
+ * /signup:
  *   post:
  *     summary: Register a new user
  *     tags: [Authentication]
@@ -272,7 +272,7 @@ router.patch('/make-admin/:id', authenticate, superAdminAuth, makeAdmin);
 
 /**
  * @swagger
- * /api/v1/login:
+ * /login:
  *   post:
  *     summary: Authenticate user and return token
  *     tags: [Authentication]
@@ -307,7 +307,7 @@ router.patch('/make-admin/:id', authenticate, superAdminAuth, makeAdmin);
 
 /**
  * @swagger
- * /api/v1/google-authenticate:
+ * /google-authenticate:
  *   get:
  *     summary: Redirect user to Google authentication
  *     tags: [Authentication]
@@ -320,7 +320,7 @@ router.get('/google-authenticate', passport.authenticate('google', { scope: ['pr
 
 /**
  * @swagger
- * /api/v1/auth/google/login:
+ * /auth/google/login:
  *   get:
  *     summary: Authenticate user via Google OAuth
  *     tags: [Authentication]
