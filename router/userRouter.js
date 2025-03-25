@@ -149,6 +149,7 @@ router.get('/users', authenticate, getAll);
  *         description: User is already verified
  */
 router.get('/verify', resendVerificationEmail);
+
 /**
  * @swagger
  * /make-admin/{id}:
