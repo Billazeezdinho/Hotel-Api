@@ -38,7 +38,7 @@ exports.authenticate = async (req, res, next) =>{
         }
         console.log(error.message)
         res.status(500).json({
-            message: 'Internal Server Error'
+            message: 'Internal Server Error' + error.message
         })
     }
 }
